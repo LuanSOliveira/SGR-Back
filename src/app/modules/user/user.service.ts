@@ -6,6 +6,7 @@ import { UserEntity } from './entities/user.entity';
 import {  Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from 'src/app/shared/dto/pagination.dto';
+import { PaginationResponseDto } from 'src/app/shared/dto/paginationReponseDto';
 
 @Injectable()
 export class UserService {
@@ -35,12 +36,7 @@ export class UserService {
     paginationDto: PaginationDto,
     name?: string,
     profile?: string,
-  ): Promise<{
-    data: UserEntity[];
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  }> {
+  ): Promise<PaginationResponseDto<UserEntity>> {
     const { page, limit } = paginationDto;
     const skip = (page - 1) * limit;
 
