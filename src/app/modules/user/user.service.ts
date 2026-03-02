@@ -37,6 +37,7 @@ export class UserService {
       take: limit,
       order: { createdAt: 'DESC' },
       select: {
+        login: true,
         name: true,
         profile: true,
         id: true,
@@ -61,6 +62,7 @@ export class UserService {
 
      return {
         id: user.id,
+        login: user.login,
         name: user.name,
         profile: user.profile,
 
@@ -72,13 +74,21 @@ export class UserService {
       const passwordHash = await bcrypt.hash(createUserDto.password, 10);
 
       const user = {
+        login: createUserDto.login,
         name: createUserDto.name,
         profile: createUserDto.profile,
         passwordHash: passwordHash,
       };
 
       const newUser = this.userRepository.create(user);
-      return await this.userRepository.save(newUser);
+      await this.userRepository.save(newUser);
+
+      return {
+        login: newUser.login,
+        name: newUser.name,
+        profile: newUser.profile,
+        id: newUser.id,
+      }
 
     } catch (error) { 
       if(error.code === '23505'){
@@ -92,6 +102,7 @@ export class UserService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     try{
       const updateUser = {
+        login: updateUserDto?.login,
         name: updateUserDto?.name,
         profile: updateUserDto?.profile,
       }
@@ -108,6 +119,7 @@ export class UserService {
       await this.userRepository.save(user);
 
       return {
+        login: user.login,
         name: user.name,
         profile: user.profile,
 
@@ -136,6 +148,7 @@ export class UserService {
     await this.userRepository.remove(user);
 
     return {
+        login: user.login,
         name: user.name,
         profile: user.profile,
 

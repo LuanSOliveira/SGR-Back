@@ -10,22 +10,24 @@ POST {{baseUrl}}/user
 Content-Type: application/json
 
 {
-    "name": "Eduardo",
+    "login": "Luan1231",
+    "name": "Luan",
     "password": "123456789",
-    "profile": "Admin"
+    "profile": "Gerente"
 
 }
 
 ###
-PATCH {{baseUrl}}/user/bb5e87a9-e054-489f-a94e-a99cbd4cc8d0/
+PATCH {{baseUrl}}/user/f54cf597-4f82-48dc-9a0d-f2a9376cb8ac/
 Content-Type: application/json
 
 {
-    "name": "Naruto",
-    "password": "987654321",
-    "profile": "Hokage"
+    "login": "Eduardo123"
     
 }
+
+###
+GET {{baseUrl}}/user/f54cf597-4f82-48dc-9a0d-f2a9376cb8ac/
 
 ###
 DELETE {{baseUrl}}/user/491785e9-2fe0-407d-8ae3-a0ea30836a99/
