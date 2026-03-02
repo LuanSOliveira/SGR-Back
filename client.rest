@@ -11,7 +11,21 @@ Content-Type: application/json
 
 {
     "name": "Eduardo",
-    "password": "2235568774",
-    "profile": "Gerente"
+    "password": "123456789",
+    "profile": "Admin"
 
 }
+
+###
+PATCH {{baseUrl}}/user/bb5e87a9-e054-489f-a94e-a99cbd4cc8d0/
+Content-Type: application/json
+
+{
+    "name": "Naruto",
+    "password": "987654321",
+    "profile": "Hokage"
+    
+}
+
+###
+DELETE {{baseUrl}}/user/491785e9-2fe0-407d-8ae3-a0ea30836a99/

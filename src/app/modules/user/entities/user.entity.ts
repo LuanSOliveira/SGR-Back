@@ -3,7 +3,7 @@ import { Column, Entity } from 'typeorm';
 
 @Entity('user')
 export class UserEntity extends TypeOrmEntity {
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ unique: true, type: 'varchar', length: 50 })
   name: string;
 
   @Column({ type: 'varchar', length: 255 })

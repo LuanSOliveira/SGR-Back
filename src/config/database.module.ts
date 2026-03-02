@@ -12,7 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       password: '123',
       database: 'restaurante_db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // CUIDADO: Use true apenas em desenvolvimento
+      synchronize: true, // CUIDADO: Use true apenas em desenvolvimento
       autoLoadEntities: true, // Carrega automaticamente as entidades
     }),
   ],

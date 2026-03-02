@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,23 +14,6 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
-
-  async create(createUserDto: CreateUserDto) {
-    try {
-      const passwordHash = await bcrypt.hash(createUserDto.password, 10);
-
-      const user = {
-        name: createUserDto.name,
-        profile: createUserDto.profile,
-        passwordHash: passwordHash,
-      };
-
-      const newUser = this.userRepository.create(user);
-      return await this.userRepository.save(newUser);
-    } catch (error) {
-      throw new Error('Erro ao criar usuario: ' + error.message);
-    }
-  }
 
   async findAll(
     paginationDto: PaginationDto,
@@ -65,15 +48,97 @@ export class UserService {
     return { data, total, totalPages, currentPage: page };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} usuario`;
+  async findOne(id: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: id
+      }
+    })
+
+    if(!user) {
+      throw new HttpException('Usuario não encontrado', HttpStatus.NOT_FOUND)
+    }
+
+     return {
+        id: user.id,
+        name: user.name,
+        profile: user.profile,
+
+    }  
   }
 
-  update(id: number, _updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} usuario`;
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+
+      const user = {
+        name: createUserDto.name,
+        profile: createUserDto.profile,
+        passwordHash: passwordHash,
+      };
+
+      const newUser = this.userRepository.create(user);
+      return await this.userRepository.save(newUser);
+
+    } catch (error) { 
+      if(error.code === '23505'){
+        throw new ConflictException('Usuario já existe');
+      }
+
+      throw new Error('Erro ao criar usuario: ' + error.message);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} usuario`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try{
+      const updateUser = {
+        name: updateUserDto?.name,
+        profile: updateUserDto?.profile,
+      }
+
+      const user = await this.userRepository.preload({
+        id: id,
+        ...updateUser,
+      })
+
+      if(!user){
+        throw new NotFoundException('Usuario não encontrado');
+      }
+
+      await this.userRepository.save(user);
+
+      return {
+        name: user.name,
+        profile: user.profile,
+
+      }  
+    }catch(error){
+      if(error.code === '23505'){
+        throw new ConflictException('Login ja existente');
+      }
+
+      throw new Error('Erro ao atualizar usuario: ' + error.message);
+    }
+      
+  }
+
+  async remove(id: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: id
+      }
+    });
+
+    if(!user){
+      throw new NotFoundException('Usuario não encontrado');
+    }
+
+    await this.userRepository.remove(user);
+
+    return {
+        name: user.name,
+        profile: user.profile,
+
+      }  
   }
 }
