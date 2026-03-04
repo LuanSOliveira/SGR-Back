@@ -1,9 +1,15 @@
-import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import {  Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from 'src/app/shared/dto/pagination.dto';
 import { PaginationResponseDto } from 'src/app/shared/dto/paginationReponseDto';
@@ -23,7 +29,7 @@ export class UserService {
     const { page, limit } = paginationDto;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: FindOptionsWhere<UserEntity> = {};
     if (name) {
       where.name = name;
     }
@@ -52,21 +58,20 @@ export class UserService {
   async findOne(id: string) {
     const user = await this.userRepository.findOne({
       where: {
-        id: id
-      }
-    })
+        id: id,
+      },
+    });
 
-    if(!user) {
-      throw new HttpException('Usuario não encontrado', HttpStatus.NOT_FOUND)
+    if (!user) {
+      throw new HttpException('Usuario não encontrado', HttpStatus.NOT_FOUND);
     }
 
-     return {
-        id: user.id,
-        login: user.login,
-        name: user.name,
-        profile: user.profile,
-
-    }  
+    return {
+      id: user.id,
+      login: user.login,
+      name: user.name,
+      profile: user.profile,
+    };
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -88,10 +93,9 @@ export class UserService {
         name: newUser.name,
         profile: newUser.profile,
         id: newUser.id,
-      }
-
-    } catch (error) { 
-      if(error.code === '23505'){
+      };
+    } catch (error) {
+      if (error.code === '23505') {
         throw new ConflictException('Usuario já existe');
       }
 
@@ -100,19 +104,19 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    try{
+    try {
       const updateUser = {
         login: updateUserDto?.login,
         name: updateUserDto?.name,
         profile: updateUserDto?.profile,
-      }
+      };
 
       const user = await this.userRepository.preload({
         id: id,
         ...updateUser,
-      })
+      });
 
-      if(!user){
+      if (!user) {
         throw new NotFoundException('Usuario não encontrado');
       }
 
@@ -122,36 +126,33 @@ export class UserService {
         login: user.login,
         name: user.name,
         profile: user.profile,
-
-      }  
-    }catch(error){
-      if(error.code === '23505'){
+      };
+    } catch (error) {
+      if (error.code === '23505') {
         throw new ConflictException('Login ja existente');
       }
 
       throw new Error('Erro ao atualizar usuario: ' + error.message);
     }
-      
   }
 
   async remove(id: string) {
     const user = await this.userRepository.findOne({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
 
-    if(!user){
+    if (!user) {
       throw new NotFoundException('Usuario não encontrado');
     }
 
     await this.userRepository.remove(user);
 
     return {
-        login: user.login,
-        name: user.name,
-        profile: user.profile,
-
-      }  
+      login: user.login,
+      name: user.name,
+      profile: user.profile,
+    };
   }
 }

@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { UserResponseDto } from "./userResponseDto";
+import { ApiProperty } from '@nestjs/swagger';
+import { UserResponseDto } from './userResponseDto';
 
 export class PaginatedUserResponseDto {
   @ApiProperty({ type: UserResponseDto, isArray: true })
