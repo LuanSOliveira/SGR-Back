@@ -37,6 +37,6 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-    "login": "EdBombadao123",
+    "login": "naeljunior1993",
     "password": "123456789"
 }
