@@ -22,7 +22,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         // Synchronize apenas se não for produção
-        synchronize: configService.get<string>('NODE_ENV') !== 'production',
+        synchronize: configService.get<string>('NODE_ENV') !== 'NODE_ENV',
         // synchronize: true,
         autoLoadEntities: true,
       }),
