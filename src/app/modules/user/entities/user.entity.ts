@@ -1,12 +1,6 @@
 import { TypeOrmEntity } from 'src/app/shared/entities/typeorm.entity';
-import { Column, Entity } from 'typeorm';
-
-export enum UserProfile {
-  admin = 'Admin',
-  garçom = 'Garçom',
-  caixa = 'Caixa',
-  gerente = 'Gerente',
-}
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { ProfileEntity } from '../../profile/entities/profile.entity';
 
 @Entity('user')
 export class UserEntity extends TypeOrmEntity {
@@ -19,11 +13,10 @@ export class UserEntity extends TypeOrmEntity {
   @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
 
-  @Column({
-    type: 'enum',
-    enum: UserProfile,
-    default: UserProfile.garçom,
+  @ManyToOne(() => ProfileEntity, {
     nullable: false,
+    onDelete: 'RESTRICT', // Impede deletar um perfil que tenha usuários vinculados
   })
-  profile: string;
+  @JoinColumn({ name: 'profileId' }) // Cria a coluna profileId no banco
+  profile: ProfileEntity;
 }

@@ -4,12 +4,12 @@ import { PaginationDto } from 'src/app/shared/dto/pagination.dto';
 
 export class UserQueryParamsDto extends PaginationDto {
   @ApiPropertyOptional({
-    example: 'Admin',
-    description: 'Filtro por profile',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Filtro por id do perfil',
   })
   @IsString()
   @IsOptional()
-  profile?: string;
+  profileId?: string;
 
   @ApiPropertyOptional({
     example: 'Luan',

@@ -1,12 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsEnum,
   IsNotEmpty,
   IsString,
+  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UserProfile } from '../entities/user.entity';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -46,11 +45,10 @@ export class CreateUserDto {
   name: string;
 
   @ApiProperty({
-    enum: UserProfile,
-    example: UserProfile.garçom,
-    description: 'Perfil do usuário',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID do perfil (UUID) vinculado ao usuário',
   })
-  @IsEnum(UserProfile)
+  @IsUUID()
   @IsNotEmpty()
-  profile: UserProfile;
+  profileId: string;
 }
