@@ -13,6 +13,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from 'src/app/shared/dto/pagination.dto';
 import { PaginationResponseDto } from 'src/app/shared/dto/paginationReponseDto';
+import { DatabaseError } from 'src/app/shared/interfaces';
 
 @Injectable()
 export class UserService {
@@ -104,15 +105,16 @@ export class UserService {
         id: newUser.id,
       };
     } catch (error) {
-      if (error.code === '23505') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === '23505') {
         throw new ConflictException('Usuario já existe');
       }
 
-      if (error.code === '23503') {
+      if (dbError.code === '23503') {
         throw new NotFoundException('O perfil informado não foi encontrado.');
       }
 
-      throw new Error('Erro ao criar usuario: ' + error.message);
+      throw new Error('Erro ao criar usuario: ' + dbError.message);
     }
   }
 
@@ -141,15 +143,16 @@ export class UserService {
         profile: user.profile,
       };
     } catch (error) {
-      if (error.code === '23505') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === '23505') {
         throw new ConflictException('Login ja existente');
       }
 
-      if (error.code === '23503') {
+      if (dbError.code === '23503') {
         throw new NotFoundException('O perfil informado não foi encontrado.');
       }
 
-      throw new Error('Erro ao atualizar usuario: ' + error.message);
+      throw new Error('Erro ao atualizar usuario: ' + dbError.message);
     }
   }
 

@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { ProfileEntity } from './entities/profile.entity';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { DatabaseError } from 'src/app/shared/interfaces';
 
 @Injectable()
 export class ProfileService {
@@ -34,7 +35,8 @@ export class ProfileService {
       const profile = this.profileRepository.create(createProfileDto);
       return await this.profileRepository.save(profile);
     } catch (error) {
-      if (error.code === '23505') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === '23505') {
         throw new ConflictException('Perfil já existe.');
       }
 
@@ -55,7 +57,8 @@ export class ProfileService {
 
       return await this.profileRepository.save(profile);
     } catch (error) {
-      if (error.code === '23505') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === '23505') {
         throw new ConflictException('Perfil já existe.');
       }
 
