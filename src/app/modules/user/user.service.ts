@@ -13,6 +13,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from 'src/app/shared/dto/pagination.dto';
 import { PaginationResponseDto } from 'src/app/shared/dto/paginationReponseDto';
+import { DatabaseError } from 'src/app/shared/interfaces';
 
 @Injectable()
 export class UserService {
@@ -24,17 +25,19 @@ export class UserService {
   async findAll(
     paginationDto: PaginationDto,
     name?: string,
-    profile?: string,
+    profileId?: string,
   ): Promise<PaginationResponseDto<UserEntity>> {
     const { page, limit } = paginationDto;
     const skip = (page - 1) * limit;
 
     const where: FindOptionsWhere<UserEntity> = {};
+
     if (name) {
       where.name = name;
     }
-    if (profile) {
-      where.profile = profile;
+
+    if (profileId) {
+      where.profile = { id: profileId };
     }
 
     const [data, total] = await this.userRepository.findAndCount({
@@ -42,11 +45,17 @@ export class UserService {
       skip,
       take: limit,
       order: { createdAt: 'DESC' },
+      relations: ['profile'],
       select: {
+        id: true,
         login: true,
         name: true,
-        profile: true,
-        id: true,
+        createdAt: true,
+        updatedAt: true,
+        profile: {
+          id: true,
+          name: true,
+        },
       },
     });
 
@@ -60,6 +69,7 @@ export class UserService {
       where: {
         id: id,
       },
+      relations: ['profile'],
     });
 
     if (!user) {
@@ -70,7 +80,7 @@ export class UserService {
       id: user.id,
       login: user.login,
       name: user.name,
-      profile: user.profile,
+      profile: { id: user.profile.id, name: user.profile.name },
     };
   }
 
@@ -78,12 +88,12 @@ export class UserService {
     try {
       const passwordHash = await bcrypt.hash(createUserDto.password, 10);
 
-      const user = {
+      const user = this.userRepository.create({
         login: createUserDto.login,
         name: createUserDto.name,
-        profile: createUserDto.profile,
         passwordHash: passwordHash,
-      };
+        profile: { id: createUserDto.profileId },
+      });
 
       const newUser = this.userRepository.create(user);
       await this.userRepository.save(newUser);
@@ -95,11 +105,16 @@ export class UserService {
         id: newUser.id,
       };
     } catch (error) {
-      if (error.code === '23505') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === '23505') {
         throw new ConflictException('Usuario já existe');
       }
 
-      throw new Error('Erro ao criar usuario: ' + error.message);
+      if (dbError.code === '23503') {
+        throw new NotFoundException('O perfil informado não foi encontrado.');
+      }
+
+      throw new Error('Erro ao criar usuario: ' + dbError.message);
     }
   }
 
@@ -108,7 +123,7 @@ export class UserService {
       const updateUser = {
         login: updateUserDto?.login,
         name: updateUserDto?.name,
-        profile: updateUserDto?.profile,
+        profile: { id: updateUserDto.profileId },
       };
 
       const user = await this.userRepository.preload({
@@ -128,11 +143,16 @@ export class UserService {
         profile: user.profile,
       };
     } catch (error) {
-      if (error.code === '23505') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === '23505') {
         throw new ConflictException('Login ja existente');
       }
 
-      throw new Error('Erro ao atualizar usuario: ' + error.message);
+      if (dbError.code === '23503') {
+        throw new NotFoundException('O perfil informado não foi encontrado.');
+      }
+
+      throw new Error('Erro ao atualizar usuario: ' + dbError.message);
     }
   }
 

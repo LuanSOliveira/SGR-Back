@@ -42,7 +42,7 @@ export class UserController {
     return this.userService.findAll(
       { page: filter.page, limit: filter.limit },
       filter.name,
-      filter.profile,
+      filter.profileId,
     );
   }
 
